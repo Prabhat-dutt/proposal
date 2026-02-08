@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For My Cutiepie ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Indie+Flower&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --c-yellow: #FFEB3B;
+            --c-pink: #FF6B8B;
+            --c-blue: #54C2F9;
+            --c-black: #111111;
+            --c-white: #ffffff;
+            --border: 4px solid var(--c-black);
+            --shadow: 8px 8px 0px var(--c-black);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-yellow);
+            background-image: radial-gradient(var(--c-black) 1.5px, transparent 1.5px);
+            background-size: 25px 25px;
+            height: 100vh; width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- COMIC UI --- */
+        .screen {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px;
+            width: 100%; height: 100%;
+        }
+
+        .comic-box {
+            background: var(--c-white);
+            border: var(--border);
+            box-shadow: var(--shadow);
+            padding: 2rem; width: 100%; max-width: 500px;
+            text-align: center; position: relative;
+            transform: rotate(-1deg);
+            z-index: 10;
+        }
+
+        h1 { font-family: 'Bangers'; font-size: 2.8rem; color: var(--c-pink); text-shadow: 2px 2px 0 var(--c-black); margin-bottom: 1rem; line-height: 1.1; }
+        p { font-size: 1.2rem; color: var(--c-black); margin-bottom: 1.5rem; font-weight: 800; line-height: 1.4; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        button {
+            background: var(--c-blue); border: var(--border); padding: 14px;
+            font-family: 'Bangers'; font-size: 1.4rem; color: var(--c-white);
+            cursor: pointer; box-shadow: 4px 4px 0 var(--c-black);
+            transition: transform 0.1s; text-transform: uppercase;
+        }
+        button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--c-black); }
+        button.pink { background: var(--c-pink); }
+
+        textarea {
+            width: 100%; height: 100px; border: 3px dashed var(--c-black); 
+            padding: 10px; font-family: 'Indie Flower'; font-weight: bold; font-size: 1.2rem; 
+            margin-bottom: 15px; resize: none; background: #FFFDF0; outline: none;
+        }
+
+        /* --- POPUP --- */
+        #popup-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+        }
+        .popup-content {
+            background: var(--c-white); border: var(--border); padding: 30px;
+            max-width: 80%; text-align: center; transform: scale(0.8);
+            box-shadow: 10px 10px 0 var(--c-black);
+        }
+        .popup-text { font-family: 'Bangers'; font-size: 1.8rem; color: var(--c-pink); margin-bottom: 20px; }
+        .next-btn { width: 60px; height: 60px; border-radius: 50%; background: var(--c-black); color: var(--c-yellow); font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+
+        /* --- ENVELOPE STAGE --- */
+        #final-stage { 
+            background: var(--c-pink); 
+            z-index: 100; 
+            transform: translateY(100%); 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        
+        .envelope-wrapper {
+            position: relative; width: 300px; height: 200px;
+            perspective: 1000px; cursor: pointer; margin-bottom: 50px;
+        }
+
+        .envelope-part { background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 10px 10px; }
+        .pocket {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: #e74c3c; z-index: 20;
+            clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+        }
+        .flap {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+            background: #c0392b; z-index: 30; transform-origin: top;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+        }
+        
+        /* The Card */
+        .letter-card {
+            position: absolute; top: 10px; left: 15px;
+            width: 270px; height: 180px;
+            background: white; z-index: 15;
+            padding: 20px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        }
+
+        .wax-seal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 60px; height: 60px; background: #a91e1e; border-radius: 50%;
+            z-index: 40; display: flex; align-items: center; justify-content: center;
+            color: white; font-family: 'Bangers'; border: 3px solid rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .hint-text {
+            position: absolute; bottom: 10%; width: 100%; text-align: center;
+            font-family: 'Bangers'; color: white; font-size: 1.8rem;
+            text-shadow: 2px 2px 0 black;
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+        /* Fullscreen Card Content */
+        .letter-text {
+            font-family: 'Indie Flower'; font-size: 1.3rem; line-height: 1.6;
+            font-weight: bold; color: #222; opacity: 0; width: 100%; height: 100%;
+            overflow-y: auto; text-align: left;
+        }
+        .highlight { color: var(--c-pink); font-weight: bold; }
+        
+        .back-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; z-index: 50; cursor: pointer; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="popup-overlay">
+        <div class="popup-content">
+            <div class="popup-text" id="popup-msg"></div>
+            <div class="next-btn" onclick="closePopup()"> &gt; </div>
+        </div>
+    </div>
+
+    <div class="back-btn" id="backBtn" onclick="goBack()">🔙</div>
+
+    <div id="game-container" class="screen"></div>
+
+    <div id="final-stage" class="screen">
+        <div class="envelope-wrapper" id="envelopeWrapper">
+            <div class="flap envelope-part" id="flap"></div>
+            <div class="pocket envelope-part"></div>
+            <div class="wax-seal" id="seal" onclick="breakSeal()">P&P</div>
+            
+            <div class="letter-card" id="card">
+                <div class="letter-text" id="final-text"></div>
+            </div>
+        </div>
+        <div class="hint-text" id="hint">Tap the Seal to Open ❤️</div>
+    </div>
+
+<script>
+    // --- SUPABASE CONFIG ---
+    const SUPABASE_URL = 'https://ezfihigzlgrxidhbulqb.supabase.co'; 
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6ZmloaWd6bGdyeGlkaGJ1bHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Mjk1NzMsImV4cCI6MjA4NjEwNTU3M30.sKd1cSawjDQ0JxDiddzhuC_Y-YlqDBK5uosviCImcQo';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // --- DATA ---
+    let sessionData = { path: [], finalInput: "" };
+    let historyStack = [];
+
+    const story = {
+        start: {
+            title: "Hi Cutiepie! ❤️",
+            text: "If our relationship was a movie genre, what would it be?",
+            options: [
+                { text: "Rom Com 🎬", next: "rom_com" },
+                { text: "Action Adventure 💥", next: "q2" }
+            ]
+        },
+        rom_com: {
+            title: "A Rom-Com?",
+            text: "Do you want me to be more romantic, or is it just fine now?",
+            options: [
+                { text: "Yes, more please! 😍", next: "how_romantic" },
+                { text: "It's fine now 😇", next: "q2", popup: "Okay baby, I understand ❤️" }
+            ]
+        },
+        how_romantic: {
+            title: "Level of Romance?",
+            text: "Choose wisely...",
+            options: [
+                { text: "Extremely (Possessive & Romantic)", next: "q2", popup: "Lovely! 😉" },
+                { text: "Beyond Extreme (Deep Love & Life)", next: "q2", popup: "Okay my beautiful cutiepie 😘" }
+            ]
+        },
+        q2: {
+            title: "Tell me...",
+            text: "How many times a day do I cross your mind?",
+            options: [
+                { text: "More than once", next: "q3", popup: "I feel lucky 🫣" },
+                { text: "Everytime", next: "q3", popup: "Toh mere pas aa jaya karo, ya hum aa jate hain na 🫣" }
+            ]
+        },
+        q3: {
+            title: "Last one...",
+            text: "Do you know how much you mean to me?",
+            options: [
+                { text: "Yes", next: "input_scene" },
+                { text: "No, tell me", action: "finale" }
+            ]
+        },
+        input_scene: {
+            title: "Your Thoughts?",
+            text: "What do you feel about us? What kind of person do you want me to be?",
+            type: "input",
+            options: [{ text: "Done! Show me the message 💌", action: "finale" }]
+        }
+    };
+
+    const fullMessage = `
+    meri <span class="highlight">cutiepie</span>,<br><br>
+    jab pehli baar hum tumse mile the tabhi hum jyada kuch jante nahi the tumhare baare mein lekin dhire-dhire hum dono baat karne lage, pehle to dar lagne laga ki kahin tum sir se complaint na kar 😅 do isiliye message karne ke baad tumhara number block kar diye lekin fir jab tum call back ki to bohot accha laga.<br><br>
+    aur fir dhire dhire kab man mein tumhare liye feelings aa gaya pata hi nahi chala, hum jante the ki kabhi na kabhi to tum meri ho jaogi, aur isliye kabhi haar nahi maane. ab tum meri ho aur hum bhi paglon ki tarah tumse pyaar karte hain, par dar bhi lagta hai ki kahin tumko mere kisi bhi baat ka harkat ka bura na lage, aur tum hurt na ho jao, par jisse darte hai hum wahi ho jata hai, par hum tumse ye kehna chahte hain, ki hum bahot pyaar karte hain tumse, aur tum mere liye bahut jaruri ho.<br><br>
+    meri kisi bhi baat ka bura mat mana karo na baccha. hum kuch bolte hain to daant do na babu, par roya mat karo, accha nahi lagta na.<br>
+    aaj propose day hai, par hum saamne se to jaake keh nahi sakte, isiliye aise bata rahe hain, meri puchki...<br><br>
+    <span class="highlight" style="font-size:2rem; font-family:'Bangers'; display:block; margin-top:15px; text-align:center;">I LOVE YOU SO MUCH 💕</span><br>
+    meri life mein hone ke liye thank you babu 😘<br><br>
+    <div style="text-align:center; font-family:'Bangers'; color:#FF6B8B; margin-top:30px; font-size: 1.5rem;">Prabhat & Puja Forever</div>
+    `;
+
+    // --- ENGINE ---
+    const container = document.getElementById('game-container');
+    const backBtn = document.getElementById('backBtn');
+
+    function renderScene(id) {
+        const scene = story[id];
+        
+        let inputHTML = scene.type === 'input' ? `<textarea id="userInput" placeholder="Dil ki baat likho..."></textarea>` : '';
+
+        // Create new content but don't clear container yet
+        const content = `
+            <div class="comic-box">
+                <h1>${scene.title}</h1>
+                <p>${scene.text}</p>
+                ${inputHTML}
+                <div class="btn-group">
+                    ${scene.options.map((opt, i) => `
+                        <button class="${i%2?'pink':''}" onclick="handleOption('${id}', ${i})">${opt.text}</button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = content;
+        backBtn.style.display = historyStack.length ? 'block' : 'none';
+        
+        // Entrance Animation
+        gsap.fromTo(".comic-box", 
+            { scale: 0.8, opacity: 0 }, 
+            { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }
+        );
+    }
+
+    window.handleOption = (id, idx) => {
+        const opt = story[id].options[idx];
+        sessionData.path.push({ question: id, answer: opt.text });
+
+        if(opt.popup) openPopup(opt.popup, opt.next, opt.action);
+        else proceed(opt.next, opt.action);
+    };
+
+    function proceed(nextId, action) {
+        const input = document.getElementById('userInput');
+        if(input) sessionData.finalInput = input.value;
+
+        if (action === "finale") {
+            saveData();
+            startFinaleMode();
+        } else {
+            historyStack.push(nextId);
+            renderScene(nextId);
+        }
+    }
+
+    // --- POPUP ---
+    const popupOverlay = document.getElementById('popup-overlay');
+    let pending = null;
+
+    function openPopup(msg, next, action) {
+        document.getElementById('popup-msg').innerText = msg;
+        pending = { next, action };
+        popupOverlay.style.pointerEvents = "auto";
+        gsap.to(popupOverlay, { opacity: 1, duration: 0.3 });
+        gsap.fromTo(".popup-content", { scale: 0 }, { scale: 1, duration: 0.5, ease: "elastic.out(1, 0.75)" });
+    }
+
+    window.closePopup = () => {
+        gsap.to(".popup-content", { scale: 0, duration: 0.3 });
+        gsap.to(popupOverlay, { opacity: 0, delay: 0.1, onComplete: () => {
+            popupOverlay.style.pointerEvents = "none";
+            proceed(pending.next, pending.action);
+        }});
+    };
+
+    window.goBack = () => location.reload();
+
+    // --- FINALE ANIMATION FIX ---
+    function startFinaleMode() {
+        backBtn.style.display = 'none';
+
+        // 1. Smoothly fade OUT the questionnaire
+        gsap.to(container, { y: -50, opacity: 0, duration: 1, ease: "power2.in" });
+
+        // 2. Smoothly slide IN the envelope (OVER the questionnaire)
+        const finalStage = document.getElementById('final-stage');
+        gsap.to(finalStage, { y: '0%', duration: 1.2, ease: "power3.inOut" });
+    }
+
+    window.breakSeal = () => {
+        document.getElementById('hint').style.display = 'none';
+        
+        const tl = gsap.timeline();
+        const card = document.getElementById('card');
+
+        // Step 1: Break Seal & Open Flap
+        tl.to("#seal", { scale: 1.3, opacity: 0, duration: 0.4 })
+          .set("#seal", { display: "none" })
+          .to("#flap", { rotateX: 180, duration: 0.6, ease: "power2.in" })
+          .set("#flap", { zIndex: 1 }) // Send flap back
+          .set("#card", { zIndex: 20 }) // Bring card to front
+
+        // Step 2: Slide Card UP (Hover Phase)
+          .to("#card", { y: -150, duration: 1, ease: "power2.out" })
+          
+        // Step 3: Hover/Heartbeat Effect
+          .to("#card", { scale: 1.05, duration: 0.2, yoyo: true, repeat: 1 }) 
+
+        // Step 4: The "Magic" Expansion (No snap!)
+          .call(() => {
+              // Calculate screen position to switch to fixed smoothly
+              const rect = card.getBoundingClientRect();
+              card.style.position = 'fixed';
+              card.style.top = rect.top + 'px';
+              card.style.left = rect.left + 'px';
+              card.style.width = rect.width + 'px';
+              card.style.height = rect.height + 'px';
+              card.style.transform = 'none'; 
+              card.style.margin = 0;
+              card.classList.add('fullscreen-mode'); // Helps styling
+          })
+          // Animate to full screen center
+          .to("#card", {
+              top: "50%", left: "50%", x: "-50%", y: "-50%",
+              width: "90vw", height: "80vh",
+              duration: 1.2, ease: "expo.inOut"
+          })
+          .call(showContent);
+    };
+
+    function showContent() {
+        const text = document.getElementById('final-text');
+        text.innerHTML = fullMessage;
+        gsap.to(text, { opacity: 1, duration: 1, delay: 0.2 });
+        
+        // Confetti
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+        setInterval(() => {
+            confetti({ particleCount: 40, spread: 360, startVelocity: 20, origin: { x: Math.random(), y: Math.random() } });
+        }, 3000);
+    }
+
+    async function saveData() {
+        await supabaseClient.from('puja_answers').insert([{ 
+            question_path: sessionData.path, 
+            final_message: sessionData.finalInput 
+        }]);
+    }
+
+    renderScene('start');
+</script>
+</body>
+</html>
