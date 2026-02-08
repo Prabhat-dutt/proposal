@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>For My Cutiepie ❤️</title>
+    <link rel="icon" href="https://img.freepik.com/free-vector/heart-love-icon_24911-115761.jpg">
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Indie+Flower&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root {
@@ -21,6 +25,10 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
+        /* --- HIDE SCROLLBARS --- */
+        body::-webkit-scrollbar, .letter-content::-webkit-scrollbar { display: none; }
+        body, .letter-content { -ms-overflow-style: none; scrollbar-width: none; }
+
         body {
             font-family: 'Fredoka', sans-serif;
             background: linear-gradient(135deg, #fff0f3 0%, #ffe4e6 100%);
@@ -30,73 +38,56 @@
             position: relative;
         }
 
-        /* --- BACKGROUND (HEARTS + FIXED METEORS) --- */
         .bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
         .bg-heart { position: absolute; color: rgba(255, 117, 140, 0.4); font-size: 1.5rem; animation: floatUp 6s linear infinite; bottom: -50px; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(0.8); opacity: 0; } 20% { opacity: 0.6; } 100% { transform: translateY(-110vh) scale(1.2); opacity: 0; } }
-        
-        .meteor { 
-            position: absolute; top: -10%; width: 2px; height: 80px; 
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,117,140,1)); 
-            opacity: 0; 
-            animation: meteorShower 3s linear infinite; 
-        }
-        /* FIXED: Now falls at the angle it is tilted */
-        @keyframes meteorShower { 
-            0% { opacity: 0; transform: translate(0, 0) rotate(35deg); } 
-            10% { opacity: 1; } 
-            100% { opacity: 0; transform: translate(-300px, 800px) rotate(35deg); } 
-        }
+        .meteor { position: absolute; top: -10%; width: 2px; height: 80px; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,117,140,1)); opacity: 0; animation: meteorShower 3s linear infinite; }
+        @keyframes meteorShower { 0% { opacity: 0; transform: translate(0, 0) rotate(35deg); } 10% { opacity: 1; } 100% { opacity: 0; transform: translate(-300px, 800px) rotate(35deg); } }
         .click-heart { position: absolute; pointer-events: none; z-index: 9999; font-size: 2rem; transform: translate(-50%, -50%); text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
 
-        /* --- UI CARD --- */
         .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 10; pointer-events: none; }
         .love-card, .nav-back-btn, #popup-overlay, #final-stage { pointer-events: auto; }
 
         .love-card { background: var(--glass); backdrop-filter: blur(10px); border-radius: 30px; box-shadow: 0 10px 40px rgba(255, 117, 140, 0.2); padding: 2rem; width: 100%; max-width: 420px; text-align: center; border: 2px solid white; transition: transform 0.3s ease; }
-        
         .scene-img { width: 130px; height: 130px; object-fit: contain; margin-bottom: 15px; border-radius: 15px; }
-
         h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 0.5rem; }
         p { font-size: 1.1rem; color: #666; margin-bottom: 1.5rem; }
 
-        .option-btn { background: white; border: 2px solid #ffe4e6; padding: 12px 15px; border-radius: 15px; width: 100%; margin-bottom: 10px; font-family: 'Fredoka'; font-size: 1rem; color: var(--text); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; }
+        .option-btn { background: white; border: 2px solid #ffe4e6; padding: 12px 15px; border-radius: 15px; width: 100%; margin-bottom: 10px; font-family: 'Fredoka'; font-size: 1rem; color: var(--text); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; text-align: left; }
         .option-btn.selected { border-color: var(--primary); background: #fff0f3; box-shadow: 0 0 15px rgba(255, 117, 140, 0.3); }
-        
+        .check-icon { opacity: 0; color: var(--primary); font-size: 1.2rem; transition: opacity 0.2s; }
+        .option-btn.selected .check-icon { opacity: 1; }
         .opt-icon { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; margin-left: 10px; border: 1px solid #eee; }
 
         .next-action-btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1rem; cursor: pointer; margin-top: 15px; opacity: 0; pointer-events: none; transition: 0.3s; font-family: 'Fredoka'; }
         .next-action-btn.visible { opacity: 1; pointer-events: auto; }
+        .done-btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 20px; width: 100%; font-size: 1.2rem; font-family: 'Fredoka'; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 117, 140, 0.4); margin-top: 10px; opacity: 0.5; pointer-events: none; transition: 0.3s; }
+        .done-btn.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
         .nav-back-btn { position: absolute; top: 20px; left: 20px; background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; z-index: 50; color: var(--primary); border: 1px solid #ffe4e6; }
-
         textarea { width: 100%; height: 100px; border: 2px solid #ffe4e6; border-radius: 15px; padding: 15px; font-family: 'Indie Flower'; font-size: 1.3rem; margin-bottom: 20px; outline: none; background: #fffafa; }
 
-        /* --- POPUP --- */
         #popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
-        .popup-content { background: white; padding: 30px; border-radius: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; width: 85%; max-width: 320px; transform: scale(0.8); transition: 0.3s; }
-        .popup-img { width: 100px; height: 100px; margin-bottom: 10px; border-radius: 10px; }
+        .popup-content { background: white; padding: 30px; border-radius: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; width: 85%; max-width: 320px; transform: scale(0.8); transition: 0.3s; position: relative; }
+        .popup-img { width: 130px; height: auto; max-height: 150px; margin: 0 auto 15px auto; display: block; border-radius: 10px; object-fit: contain; }
+        .zoom-img { width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 10px; }
         .popup-text { font-size: 1.3rem; color: var(--primary); margin-bottom: 20px; line-height: 1.4; }
         .popup-close-btn { width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto; cursor: pointer; }
+        .close-icon-top { position: absolute; top: 10px; right: 10px; font-size: 1.5rem; cursor: pointer; color: #999; }
 
-        /* --- FINALE --- */
         #final-stage { position: fixed; inset: 0; background: linear-gradient(180deg, #fff0f3 0%, #ffcbd1 100%); z-index: 100; transform: translateY(100%); transition: 0.8s ease-in-out; }
         .envelope-wrapper { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 200px; cursor: pointer; }
         .pocket { position: absolute; bottom: 0; inset-inline: 0; height: 100%; background: #ff758c; border-radius: 0 0 10px 10px; z-index: 20; clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%); }
-        .flap { position: absolute; top: 0; inset-inline: 0; height: 50%; background: #ff5c77; border-radius: 10px 10px 0 0; z-index: 30; transform-origin: top; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+        .flap { position: absolute; top: 0; inset-inline: 0; height: 50%; background: #ff5c77; border-radius: 0 0 0 0; z-index: 30; transform-origin: top; clip-path: polygon(0 0, 100% 0, 50% 100%); }
         .seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 55px; height: 55px; background: #ffd700; border-radius: 50%; z-index: 40; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 3px solid #f39c12; }
-        
-        .card-letter { 
-            position: absolute; top: 10px; left: 15px; width: 270px; height: 180px; 
-            background: white; border-radius: 10px; z-index: 15; padding: 25px; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; transform-origin: center; 
-        }
-        
+        .card-letter { position: absolute; top: 10px; left: 15px; width: 270px; height: 180px; background: white; border-radius: 10px; z-index: 15; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; transform-origin: center; }
+        .final-img { width: 150px; height: auto; object-fit: cover; border-radius: 10px; margin: 0 auto 15px auto; display: block; }
         .letter-content { font-family: 'Indie Flower'; font-size: 1.2rem; color: #444; line-height: 1.6; opacity: 0; height: 100%; overflow-y: auto; text-align: left; }
         .reply-section { margin-top: 30px; border-top: 1px dashed #eee; padding-top: 20px; }
         .reply-input { width: 100%; padding: 12px; border: 1px solid #ffe4e6; border-radius: 12px; margin-bottom: 10px; font-family: 'Fredoka'; font-size: 1rem; }
-        .reply-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: 'Fredoka'; }
-        
+        .reply-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: 'Fredoka'; box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3); }
+        .print-btn { position: absolute; top: 15px; right: 20px; font-size: 1.3rem; cursor: pointer; color: var(--primary); background: none; border: none; z-index: 100; opacity: 0; pointer-events: none; }
+        .pdf-timestamp { display: none; font-size: 0.8rem; color: #999; text-align: right; margin-top: 20px; font-family: 'Fredoka', sans-serif; }
         .hint { position: absolute; bottom: -60px; width: 100%; text-align: center; color: white; font-weight: 600; font-size: 1.2rem; animation: bounce 1.5s infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .v-tag { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.75rem; color: #ffb1bc; }
@@ -105,10 +96,10 @@
 <body>
 
     <div class="bg-layer" id="bgLayer"></div>
-    <div id="popup-overlay"><div class="popup-content"><img src="" id="popup-img" class="popup-img"><div class="popup-text" id="popup-msg"></div><div class="popup-close-btn" onclick="closePopup()">➜</div></div></div>
+    <div id="popup-overlay"><div class="popup-content"><div class="close-icon-top" onclick="closePopup()">×</div><img src="" id="popup-img" class="popup-img" style="display:none"><div class="popup-text" id="popup-msg"></div><div class="popup-close-btn" onclick="closePopup()">➜</div></div></div>
     <div class="nav-back-btn" id="navBackBtn" onclick="goBack()" style="display: none;">←</div>
     <div id="game-container" class="screen"></div>
-    <div id="final-stage"><div class="envelope-wrapper" id="envelopeWrapper"><div class="flap" id="flap"></div><div class="pocket"></div><div class="seal" id="seal" onclick="openEnvelope()">❤️</div><div class="card-letter" id="letterCard"><div class="letter-content" id="letterText"></div></div><div class="hint" id="hint">Tap to open my heart...</div></div><div class="v-tag">v3.4 | Made for Puja ❤️</div></div>
+    <div id="final-stage"><div class="envelope-wrapper" id="envelopeWrapper"><div class="flap" id="flap"></div><div class="pocket"></div><div class="seal" id="seal" onclick="openEnvelope()">❤️</div><div class="card-letter" id="letterCard"><button class="print-btn" onclick="printLetter()"><i class="fa-solid fa-print"></i></button><div class="letter-content" id="letterText"></div></div><div class="hint" id="hint">Tap to open my heart...</div></div><div class="v-tag">v5.3 | Made for Puja ❤️</div></div>
 
 <script>
     const SUPABASE_URL = 'https://ezfihigzlgrxidhbulqb.supabase.co'; 
@@ -119,66 +110,18 @@
     let currentSessionId = null;
     let currentSceneId = 'start';
 
-    // --- STORY DATA WITH YOUR LINKS ---
     const story = {
-        start: { 
-            title: "Hi cutiepie!", 
-            text: "If our relationship was a movie genre, what would it be?", 
-            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGQEQgM-Su_gvjv5KZp8ofU0qvpGN8AuuCw&s",
-            options: [{ text: "Rom com ❤️", next: "rom_com_branch" }, { text: "Action Adventure 💥", next: "q2" }] 
-        },
-        rom_com_branch: { 
-            title: "A Rom-Com, huh?", 
-            text: "Do you want me to be more romantic, or is it just fine now?", 
-            img: "https://media.tenor.com/TTFelOytUMwAAAAj/love-you.gif",
-            options: [{ text: "Yes, more please! 😍", next: "how_romantic" }, { text: "It's fine now 😇", next: "q2", popup: "okay baby, I understand.", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4aF5aG0A58mpLrJgmK3txGXA60kqjoeij0A&s" }] 
-        },
-        how_romantic: { 
-            title: "How much romantic?", 
-            text: "Pick your level...", 
-            img: "https://ih1.redbubble.net/image.5564060209.6508/st,small,507x507-pad,600x600,f8f8f8.webp",
-            options: [
-                { text: "Extremely (Possessive & Romantic)", popup: "lovely", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmCkNgssnhJ6h8rXeLfoLIWJSBubrvqTWVHA&s", next: "q2", oImg: "https://static.vecteezy.com/system/resources/previews/066/175/034/non_2x/flat-illustration-showing-a-romantic-couple-giving-warm-hug-to-each-other-vector.jpg" }, 
-                { text: "Beyond Extremely (Personal, Life, Love)", popup: "okay my beautiful cutiepie", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgMxSFT0tGCc5BVK4BtVFTMgLHPVxLBJr68A&s", next: "q2", oImg: "https://st2.depositphotos.com/1006318/5909/v/450/depositphotos_59095503-stock-illustration-couple-kissing-in-bed.jpg" }
-            ] 
-        },
-        q2: { 
-            title: "Question 2", 
-            text: "How many times a day do I cross your mind?", 
-            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD7a9M8WV0xOjTR79l9WlLxF99WxuT_-W-aA&s",
-            options: [{ text: "More than once", popup: "I feel lucky 🫣", pImg: "https://i.pinimg.com/originals/16/73/c1/1673c11056581664f508caefb8c737b8.gif", next: "q3" }, { text: "Everytime", popup: "toh mere pas aa jaya karo, ya hum aa jate hain na 🫣", pImg: "https://media.tenor.com/TTFelOytUMwAAAAj/love-you.gif", next: "q3" }] 
-        },
-        q3: { 
-            title: "One more thing...", 
-            text: "Do you know how much you mean to me?", 
-            img: "https://getbubududu.com/wp-content/uploads/2025/02/Peach-and-Goma-300x300.png",
-            options: [{ text: "Yes", next: "input_branch" }, { text: "No, tell me", action: "finale" }] 
-        },
-        input_branch: { 
-            title: "Tell me more...", 
-            text: "What do you feel about us? And what kind of person do you want me to be for you?", 
-            img: "https://getbubududu.com/wp-content/uploads/2025/02/Peach-and-Goma-300x300.png",
-            type: "input", 
-            options: [{ text: "Done, now tell me... 💌", action: "finale" }] 
-        }
+        start: { title: "Hi cutiepie!", text: "If our relationship was a movie genre, what would it be?", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGQEQgM-Su_gvjv5KZp8ofU0qvpGN8AuuCw&s", options: [{ text: "Rom com ❤️", next: "rom_com_branch" }, { text: "Action Adventure 💥", next: "q2" }] },
+        rom_com_branch: { title: "A Rom-Com, huh?", text: "Do you want me to be more romantic, or is it just fine now?", img: "https://media.tenor.com/TTFelOytUMwAAAAj/love-you.gif", options: [{ text: "Yes, more please! 😍", next: "how_romantic" }, { text: "It's fine now 😇", next: "q2", popup: "okay baby, I understand.", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4aF5aG0A58mpLrJgmK3txGXA60kqjoeij0A&s" }] },
+        how_romantic: { title: "How much romantic?", text: "Pick your level...", img: "https://ih1.redbubble.net/image.5564060209.6508/st,small,507x507-pad,600x600,f8f8f8.webp", options: [{ text: "Extremely (Possessive & Romantic)", popup: "lovely", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmCkNgssnhJ6h8rXeLfoLIWJSBubrvqTWVHA&s", next: "q2", oImg: "https://static.vecteezy.com/system/resources/previews/066/175/034/non_2x/flat-illustration-showing-a-romantic-couple-giving-warm-hug-to-each-other-vector.jpg" }, { text: "Beyond Extremely (Personal, Life, Love)", popup: "okay my beautiful cutiepie", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgMxSFT0tGCc5BVK4BtVFTMgLHPVxLBJr68A&s", next: "q2", oImg: "https://st2.depositphotos.com/1006318/5909/v/450/depositphotos_59095503-stock-illustration-couple-kissing-in-bed.jpg" }] },
+        q2: { title: "Question 2", text: "How many times a day do I cross your mind?", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD7a9M8WV0xOjTR79l9WlLxF99WxuT_-W-aA&s", options: [{ text: "More than once", popup: "I feel lucky 🫣", pImg: "https://i.pinimg.com/originals/16/73/c1/1673c11056581664f508caefb8c737b8.gif", next: "q3" }, { text: "Everytime", popup: "toh mere pas aa jaya karo, ya hum aa jate hain na 🫣", pImg: "https://media.tenor.com/TTFelOytUMwAAAAj/love-you.gif", next: "q3" }] },
+        q3: { title: "One more thing...", text: "Do you know how much you mean to me?", img: "https://getbubududu.com/wp-content/uploads/2025/02/Peach-and-Goma-300x300.png", options: [{ text: "Yes", next: "input_branch" }, { text: "No, tell me", action: "finale" }] },
+        input_branch: { title: "Tell me more...", text: "What do you feel about us? And what kind of person do you want me to be for you?", img: "https://getbubududu.com/wp-content/uploads/2025/02/Peach-and-Goma-300x300.png", type: "input", options: [{ text: "Done, now tell me... 💌", action: "finale" }] }
     };
 
     const finalCardImg = "https://scontent.fpat3-1.fna.fbcdn.net/v/t39.30808-6/475148285_527297853702563_111233335804019872_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=g_JDEjChjyIQ7kNvwG44RbJ&_nc_oc=AdngahRDO_eUgw3kbVZXJBUS4EELVt8kCL5g24jgsgma7iZi_u9dwrK0TVNnSExsFYs9Y77GcAb2RkGjggYAMmyH&_nc_zt=23&_nc_ht=scontent.fpat3-1.fna&_nc_gid=G3IzoNo3hli1854s0KUYTA&oh=00_Afs7gt5XxiCspyXetndE0sB0rJIrrK2CV9R1sSYXeiun2A&oe=698E2317";
 
-    const fullMessage = `
-        <img src="${finalCardImg}" style="width:100%; border-radius:10px; margin-bottom:15px;">
-        Meri <span style="color:#ff758c; font-weight:bold;">cutiepie</span>,<br><br>
-        Jab pehli baar hum tumse mile the tabhi hum jyada kuch jante nahi the tumhare baare mein lekin dhire-dhire hum dono baat karne lage, pehle to dar lagne laga ki kahin tum sir se complaint na kar 😅 do isiliye message karne ke baad tumhara number block kar diye lekin fir jab tum call back ki to bohot accha laga.<br><br>
-        Aur fir dhire dhire kab man mein tumhare liye feelings aa gaya pata hi nahi chala, hum jante the ki kabhi na kabhi to tum meri ho jaogi, aur isliye kabhi haar nahi maane. Ab tum meri ho aur hum bhi paglon ki tarah tumse pyaar karte hain, par dar bhi lagta hai ki kahin tumko mere kisi bhi baat ka harkat ka bura na lage, aur tum hurt na ho jao, par jisse darte hai hum wahi ho jata hai, par hum tumse ye kehna chahte hain, ki hum bahot pyaar karte hain tumse, aur tum mere liye bahut jaruri ho.<br><br>
-        Meri kisi bhi baat ka bura mat mana karo na baccha. Hum kuch bolte hain to daant do na babu, par roya mat karo, accha nahi lagta na.<br><br>
-        Aaj propose day hai, par hum saamne se to jaake keh nahi sakte , isiliye aise bata rahe hain, meri puchki...<br><br>
-        <span style="font-size:1.5rem; color:#ff758c; font-weight:bold;">I LOVE YOU SO MUCH 💕 😘</span><br><br>
-        Meri life mein hone ke liye thank you babu 😘 
-        <div class="reply-section">
-            <input type="text" id="finalReply" class="reply-input" placeholder="kuch aur kehna chahti ho? yaha likho...">
-            <button onclick="sendReply()" class="reply-btn">Send ❤️</button>
-        </div>
-        <div style="margin-top:20px; font-size:0.9rem; color:#999; cursor:pointer;" onclick="location.reload()">↺ Start Over</div>`;
+    const fullMessage = `<div id="print-area"><img src="${finalCardImg}" class="final-img">Meri <span style="color:#ff758c; font-weight:bold;">cutiepie</span>,<br><br>Jab pehli baar hum tumse mile the tabhi hum jyada kuch jante nahi the tumhare baare mein lekin dhire-dhire hum dono baat karne lage, pehle to dar lagne laga ki kahin tum sir se complaint na kar 😅 do isiliye message karne ke baad tumhara number block kar diye lekin fir jab tum call back ki to bohot accha laga.<br><br>Aur fir dhire dhire kab man mein tumhare liye feelings aa gaya pata hi nahi chala, hum jante the ki kabhi na kabhi to tum meri ho jaogi, aur isliye kabhi haar nahi maane. Ab tum meri ho aur hum bhi paglon ki tarah tumse pyaar karte hain, par dar bhi lagta hai ki kahin tumko mere kisi bhi baat ya harkat ka bura na lage, aur tum hurt na ho jao, par jisse darte hai hum wahi ho jata hai, par hum tumse ye kehna chahte hain, ki hum bahot pyaar karte hain tumse, aur tum mere liye bahut jaruri ho.<br><br>Meri kisi bhi baat ka bura mat mana karo na baccha. Hum kuch bolte hain to daant do na babu, par roya mat karo, accha nahi lagta na.<br><br>Aaj propose day hai, par hum saamne se to jaake keh nahi sakte , isiliye aise bata rahe hain, meri puchki...<br><br><span style="font-size:1.5rem; color:#ff758c; font-weight:bold;">I LOVE YOU SO MUCH 💕 😘</span><br><br>Meri life mein hone ke liye thank you babu 😘 <div id="pdf-timestamp" class="pdf-timestamp"></div></div><div class="reply-section"><input type="text" id="finalReply" class="reply-input" placeholder="kuch aur kehna chahti ho? yaha likho..."><button onclick="sendReply()" class="reply-btn">Send ❤️</button></div><div style="margin-top:20px; font-size:0.9rem; color:#999; cursor:pointer;" onclick="location.reload()">↺ Start Over</div>`;
 
     document.addEventListener('click', (e) => {
         if(['BUTTON', 'INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
@@ -196,7 +139,6 @@
             h.style.left = Math.random() * 100 + '%'; h.style.animationDuration = (4 + Math.random() * 4) + 's';
             bg.appendChild(h); setTimeout(() => h.remove(), 8000);
         }, 800);
-        // METEOR SHOWER
         setInterval(() => {
             const m = document.createElement('div'); m.className = 'meteor'; m.style.left = (Math.random() * 100 + 20) + '%';
             bg.appendChild(m); setTimeout(() => m.remove(), 3000);
@@ -209,23 +151,8 @@
 
     function renderScene(id) {
         currentSceneId = id; const scene = story[id];
-        let inputHTML = scene.type === 'input' ? `<textarea id="userInput" placeholder="Write here..." oninput="enableNext()"></textarea>` : '';
-        selectedOption = null;
-        container.innerHTML = `
-            <div class="love-card">
-                <img src="${scene.img}" class="scene-img">
-                <h1>${scene.title}</h1>
-                <p>${scene.text}</p>
-                ${inputHTML}
-                <div class="btn-group">
-                    ${(scene.options || []).map((opt, i) => `
-                        <div class="option-btn" id="opt-${i}" onclick="selectOption(${i})">
-                            ${opt.text}
-                            ${opt.oImg ? `<img src="${opt.oImg}" class="opt-icon">` : '<span style="color:#ff758c; font-size:1.2rem;">✔️</span>'}
-                        </div>`).join('')}
-                </div>
-                <button id="nextBtn" class="next-action-btn" onclick="confirmSelection()">Next →</button>
-            </div>`;
+        let contentHTML = scene.type === 'input' ? `<textarea id="userInput" placeholder="Write here..." oninput="enableDoneBtn()"></textarea><button id="doneBtn" class="done-btn" onclick="confirmInput('${scene.options[0].action}')">${scene.options[0].text}</button>` : `<div class="btn-group">${(scene.options || []).map((opt, i) => `<div class="option-btn" id="opt-${i}" onclick="selectOption(${i})"><div style="display:flex; align-items:center;">${opt.text}</div><div style="display:flex; align-items:center;">${opt.oImg ? `<img src="${opt.oImg}" class="opt-icon" onclick="zoomImage(event, '${opt.oImg}')">` : ''}<span class="check-icon" style="margin-left:10px;">✔️</span></div></div>`).join('')}</div><button id="nextBtn" class="next-action-btn" onclick="confirmSelection()">Next →</button>`;
+        container.innerHTML = `<div class="love-card"><img src="${scene.img}" class="scene-img"><h1>${scene.title}</h1><p>${scene.text}</p>${contentHTML}</div>`;
         document.getElementById('navBackBtn').style.display = id !== 'start' ? 'flex' : 'none';
         gsap.fromTo(".love-card", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 });
     }
@@ -237,14 +164,28 @@
         document.getElementById('nextBtn').classList.add('visible');
     };
 
-    window.enableNext = () => {
+    window.zoomImage = (e, src) => {
+        e.stopPropagation();
+        const img = document.getElementById('popup-img');
+        img.src = src; img.style.display = 'block'; img.className = 'zoom-img';
+        document.getElementById('popup-msg').innerText = "";
+        document.querySelector('.popup-close-btn').style.display = 'none';
+        const overlay = document.getElementById('popup-overlay');
+        overlay.style.opacity = 1; overlay.style.pointerEvents = 'auto';
+        document.querySelector('.popup-content').style.transform = 'scale(1)';
+    };
+
+    window.enableDoneBtn = () => {
         const val = document.getElementById('userInput').value;
-        document.getElementById('nextBtn').classList.toggle('visible', val.length > 0);
+        document.getElementById('doneBtn').classList.toggle('active', val.length > 0);
+    };
+
+    window.confirmInput = (action) => {
+        sessionData.finalInput = document.getElementById('userInput').value;
+        if(action === "finale") { saveData(); startFinale(); }
     };
 
     window.confirmSelection = () => {
-        const input = document.getElementById('userInput');
-        if(input) { sessionData.finalInput = input.value; selectedOption = story[currentSceneId].options[0]; }
         if(!selectedOption) return;
         sessionData.path.push({ q: story[currentSceneId].text, a: selectedOption.text });
         if(selectedOption.popup) openPopup(selectedOption.popup, selectedOption.next, selectedOption.action, selectedOption.pImg);
@@ -261,16 +202,25 @@
 
     const popupOverlay = document.getElementById('popup-overlay');
     let pendingNav = null;
+
     function openPopup(msg, next, action, pImg) {
         document.getElementById('popup-msg').innerText = msg; 
-        document.getElementById('popup-img').src = pImg || "";
+        const img = document.getElementById('popup-img');
+        if(pImg) { 
+            img.style.display='none'; // Hide while switching src
+            img.src = pImg; 
+            img.onload = () => { img.style.display='block'; img.className='popup-img'; };
+        } else { img.style.display='none'; }
+        
         pendingNav = { next, action };
+        document.querySelector('.popup-close-btn').style.display = 'flex';
         popupOverlay.style.opacity = 1; popupOverlay.style.pointerEvents = 'auto';
         document.querySelector('.popup-content').style.transform = 'scale(1)';
     }
+
     window.closePopup = () => {
         document.querySelector('.popup-content').style.transform = 'scale(0.8)'; popupOverlay.style.opacity = 0;
-        setTimeout(() => { popupOverlay.style.pointerEvents = 'none'; navigate(pendingNav.next, pendingNav.action); }, 300);
+        setTimeout(() => { popupOverlay.style.pointerEvents = 'none'; if(pendingNav) navigate(pendingNav.next, pendingNav.action); }, 300);
     };
 
     function startFinale() {
@@ -283,8 +233,9 @@
         document.getElementById('hint').style.display = 'none';
         const tl = gsap.timeline();
         tl.to("#seal", { scale: 0, duration: 0.3 }).to("#flap", { rotateX: 180, duration: 0.6, transformOrigin: "top" }).set("#flap", { zIndex: 1 }).set("#letterCard", { zIndex: 9999 }).to("#letterCard", { y: -200, duration: 0.8, ease: "back.out(1.2)" }).to("#letterCard", { position: "fixed", top: "50%", left: "50%", xPercent: -50, yPercent: -50, x: 0, y: 0, width: "90vw", height: "75vh", duration: 1.2, ease: "power3.inOut" }).call(() => {
-            const textDiv = document.getElementById('letterText'); textDiv.innerHTML = fullMessage;
-            gsap.to(textDiv, { opacity: 1, duration: 1 });
+            document.getElementById('letterText').innerHTML = fullMessage;
+            gsap.to('.letter-content', { opacity: 1, duration: 1 });
+            gsap.to(".print-btn", { opacity: 1, pointerEvents: "auto", duration: 0.5, delay: 1 });
             confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#ff758c', '#ffffff'] });
         });
     };
@@ -295,15 +246,30 @@
     }
 
     window.sendReply = async () => {
-        const reply = document.getElementById('finalReply').value;
+        const reply = document.getElementById('finalReply').value.trim();
         if(!reply || !currentSessionId) return;
         const btn = document.querySelector('.reply-btn');
         btn.innerText = "Sending...";
-        const { error } = await supabaseClient.from('puja_answers').update({ final_reply: reply }).eq('id', currentSessionId);
-        if(!error) {
-            btn.innerText = "Sent! ❤️"; btn.style.backgroundColor = "#4cd137";
-            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+        await supabaseClient.from('puja_answers').update({ final_reply: reply }).eq('id', currentSessionId);
+        btn.innerText = "Sent! ❤️"; btn.style.backgroundColor = "#4cd137";
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        const rain = setInterval(() => createClickHeart(Math.random()*window.innerWidth, -50), 300);
+        setTimeout(() => clearInterval(rain), 5000);
+
+        if(reply.toLowerCase().includes("i love you")) {
+            setTimeout(() => { pendingNav = null; openPopup("I love you too babu 😘", null, null, "https://media.tenor.com/p1_r03vjU_0AAAAi/peach-goma.gif"); }, 1000);
         }
+    };
+
+    window.printLetter = () => {
+        const element = document.getElementById('print-area');
+        const timeDiv = document.getElementById('pdf-timestamp');
+        const d = new Date();
+        const pad = (n) => n < 10 ? '0' + n : n;
+        const h12 = d.getHours() % 12 || 12;
+        timeDiv.innerText = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()} ${pad(h12)}:${pad(d.getMinutes())} ${d.getHours() >= 12 ? 'pm' : 'am'}`;
+        timeDiv.style.display = 'block';
+        html2pdf().set({ margin: [10, 20, 10, 20], filename: 'For_Puja.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save().then(() => timeDiv.style.display = 'none');
     };
 
     history.replaceState({ sceneId: 'start' }, null, '?scene=start');
@@ -311,4 +277,3 @@
 </script>
 </body>
 </html>
-
