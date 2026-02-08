@@ -14,13 +14,11 @@
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #fff0f3 0%, #ffe4e6 100%);
-            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-bg: rgba(255, 255, 255, 0.95);
             --primary: #ff758c;
             --secondary: #ff7eb3;
-            --accent: #74b9ff;
             --text: #4a4a4a;
             --shadow-soft: 0 10px 30px rgba(255, 117, 140, 0.2);
-            --border-radius: 25px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -33,17 +31,6 @@
             color: var(--text);
         }
 
-        /* --- BACKGROUND FLOATING ELEMENTS --- */
-        .floating-bg {
-            position: absolute; width: 100%; height: 100%; z-index: 0; pointer-events: none;
-        }
-        .blob {
-            position: absolute; background: rgba(255, 117, 140, 0.1);
-            border-radius: 50%; filter: blur(40px);
-            animation: floatBlob 10s infinite alternate;
-        }
-        @keyframes floatBlob { from { transform: translate(0,0); } to { transform: translate(20px, -20px); } }
-
         /* --- UI CARD --- */
         .screen {
             position: absolute; inset: 0;
@@ -53,49 +40,31 @@
 
         .love-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: var(--border-radius);
+            border-radius: 25px;
             box-shadow: var(--shadow-soft);
-            padding: 2.5rem; width: 100%; max-width: 450px;
+            padding: 2rem; width: 100%; max-width: 420px;
             text-align: center; border: 2px solid white;
-            transform: scale(0.95); opacity: 0; /* JS will animate */
+            opacity: 0; /* JS handles fade in */
         }
 
-        h1 { 
-            font-size: 2.2rem; color: var(--primary); 
-            margin-bottom: 1rem; line-height: 1.2;
-        }
-        p { 
-            font-size: 1.1rem; color: #666; 
-            margin-bottom: 2rem; line-height: 1.5; font-weight: 400;
-        }
+        h1 { font-size: 2rem; color: var(--primary); margin-bottom: 1rem; line-height: 1.2; }
+        p { font-size: 1.1rem; color: #666; margin-bottom: 2rem; line-height: 1.5; }
 
-        .btn-group { display: flex; flex-direction: column; gap: 15px; }
-        
         button {
             background: white; border: 2px solid #ffe4e6;
-            padding: 15px; border-radius: 15px;
+            padding: 15px; border-radius: 15px; width: 100%; margin-bottom: 10px;
             font-family: 'Fredoka', sans-serif; font-size: 1.1rem; color: var(--text);
-            cursor: pointer; transition: all 0.2s ease;
+            cursor: pointer; transition: all 0.2s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        
-        button:hover {
-            background: var(--primary); color: white; border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(255, 117, 140, 0.3);
-        }
-        
-        button:active { transform: scale(0.98); }
+        button:active { transform: scale(0.98); background: #fff0f3; }
 
         textarea {
             width: 100%; height: 100px; border: 2px solid #ffe4e6;
             border-radius: 15px; padding: 15px; 
             font-family: 'Indie Flower'; font-size: 1.3rem; 
-            margin-bottom: 20px; resize: none; outline: none;
-            background: #fffafa;
+            margin-bottom: 20px; resize: none; outline: none; background: #fffafa;
         }
-        textarea:focus { border-color: var(--primary); }
 
         /* --- POPUP --- */
         #popup-overlay {
@@ -105,17 +74,14 @@
             opacity: 0; pointer-events: none;
         }
         .popup-content {
-            background: white; padding: 40px; border-radius: 30px;
-            box-shadow: var(--shadow-soft); text-align: center;
-            max-width: 80%; transform: scale(0.8);
+            background: white; padding: 30px; border-radius: 20px;
+            box-shadow: var(--shadow-soft); text-align: center; width: 80%; max-width: 300px;
         }
-        .popup-text { font-size: 1.5rem; color: var(--primary); margin-bottom: 20px; }
+        .popup-text { font-size: 1.4rem; color: var(--primary); margin-bottom: 20px; }
         .next-arrow {
-            width: 50px; height: 50px; background: var(--primary);
-            color: white; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center;
+            width: 50px; height: 50px; background: var(--primary); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem; margin: 0 auto; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 117, 140, 0.4);
         }
 
         /* --- FINAL ENVELOPE STAGE --- */
@@ -125,13 +91,12 @@
             z-index: 100; transform: translateY(100%);
         }
 
-        /* Envelope */
         .envelope-wrapper {
-            position: relative; width: 300px; height: 200px;
-            margin: 0 auto; cursor: pointer;
-            margin-top: 30vh; /* Position it nicely */
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); /* Centered initially */
+            width: 300px; height: 200px;
+            cursor: pointer;
         }
-        .envelope { position: relative; width: 100%; height: 100%; }
         
         .pocket {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
@@ -143,73 +108,43 @@
             background: #ff5c77; border-radius: 10px 10px 0 0; z-index: 30; 
             transform-origin: top; clip-path: polygon(0 0, 100% 0, 50% 100%);
         }
-        
         .seal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 50px; height: 50px; background: gold; border-radius: 50%;
-            z-index: 40; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: #d35400; border: 2px solid #e67e22;
+            z-index: 40; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; border: 2px solid #e67e22;
         }
 
-        /* The Letter */
+        /* The Card */
         .card-letter {
             position: absolute; top: 10px; left: 15px;
             width: 270px; height: 180px;
-            background: white; border-radius: 5px;
-            z-index: 15; padding: 20px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column;
+            background: white; border-radius: 10px;
+            z-index: 15; padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden; /* Hide scrollbars initially */
         }
 
         .letter-content {
             font-family: 'Indie Flower'; font-size: 1.3rem; 
             color: #444; line-height: 1.6; opacity: 0;
-            overflow-y: auto; height: 100%;
+            height: 100%; overflow-y: auto; text-align: left;
         }
         
-        /* Input in Letter */
-        .reply-section {
-            margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 20px;
-            text-align: center;
-        }
-        .reply-input {
-            width: 100%; padding: 8px; border: 1px solid #ddd;
-            border-radius: 8px; font-family: 'Indie Flower';
-            margin-bottom: 10px; background: #fdfdfd;
-        }
-        .reply-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 8px 20px; border-radius: 20px; cursor: pointer;
-        }
+        .reply-section { margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 20px; text-align: center; }
+        .reply-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-family: 'Indie Flower'; font-size: 1.1rem;}
+        .reply-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; }
 
-        /* Footer Version */
-        .version-tag {
-            position: fixed; bottom: 10px; width: 100%; text-align: center;
-            font-size: 0.8rem; color: rgba(0,0,0,0.3); pointer-events: none;
-        }
-        
-        .tap-hint {
-            position: absolute; width: 100%; text-align: center; bottom: -60px;
+        .hint-text {
+            position: absolute; bottom: -50px; width: 100%; text-align: center;
             color: white; font-size: 1.2rem; animation: bounce 1.5s infinite;
         }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* Fullscreen class for card */
-        .fullscreen-card {
-            position: fixed !important; top: 10% !important; left: 5% !important;
-            width: 90% !important; height: 80% !important;
-            z-index: 200 !important; border-radius: 10px;
-            margin: 0 !important; transform: none !important;
-        }
+        .version-tag { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.8rem; color: rgba(0,0,0,0.3); pointer-events: none; }
     </style>
 </head>
 <body>
-
-    <div class="floating-bg">
-        <div class="blob" style="top: 10%; left: -10%; width: 300px; height: 300px;"></div>
-        <div class="blob" style="bottom: 20%; right: -10%; width: 200px; height: 200px; background: rgba(116, 185, 255, 0.1);"></div>
-    </div>
 
     <div id="popup-overlay">
         <div class="popup-content">
@@ -228,21 +163,17 @@
             <div class="card-letter" id="letterCard">
                 <div class="letter-content" id="letterText"></div>
             </div>
-            <div class="tap-hint" id="hint">Tap the heart...</div>
+            <div class="hint-text" id="hint">Tap to Open</div>
         </div>
-        
-        <div class="version-tag">Made with ❤️ | v2.1</div>
+        <div class="version-tag">v2.2 | Made with Love</div>
     </div>
 
 <script>
-    // --- SUPABASE CONFIG ---
     const SUPABASE_URL = 'https://ezfihigzlgrxidhbulqb.supabase.co'; 
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6ZmloaWd6bGdyeGlkaGJ1bHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Mjk1NzMsImV4cCI6MjA4NjEwNTU3M30.sKd1cSawjDQ0JxDiddzhuC_Y-YlqDBK5uosviCImcQo';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- STATE ---
     let sessionData = { path: [], finalInput: "" };
-    let historyStack = [];
 
     const story = {
         start: {
@@ -295,29 +226,20 @@
 
     const fullMessage = `
     My Dearest <span style="color:#ff758c; font-weight:bold;">Puja</span>,<br><br>
-    
     Jab pehli baar hum tumse mile the, tabhi hum jyada kuch jante nahi the tumhare baare mein. Lekin dhire-dhire jab hum dono baat karne lage... honestly, I was scared. Darr lagta tha ki kahin tum gussa na ho jao 😅.<br><br>
-    
     But then you called back. And that changed everything.<br><br>
-    
     Pata nahi kab tumhare liye feelings aa gayi. I always knew deep down that you would be mine. Aur ab jab tum meri ho... I promise to love you insanely. <br><br>
-    
     Darr aaj bhi lagta hai—ki kahin tum hurt na ho jao. Because you matter the most to me. Agar kabhi kuch galat bol du, toh daant dena, par roothna mat please?<br><br>
-    
     Happy Propose Day, my love.<br>
-    <span style="font-size:1.5rem; color:#ff758c;">I LOVE YOU SO MUCH 💕</span><br><br>
-    
+    <span style="font-size:1.5rem; color:#ff758c; display:block; margin:10px 0;">I LOVE YOU SO MUCH 💕</span>
     Forever yours,<br>Prabhat
-    
     <div class="reply-section">
         <input type="text" id="finalReply" class="reply-input" placeholder="Type 'I love you too'...">
         <button onclick="sendReply()" class="reply-btn">Send ❤️</button>
     </div>
-    
     <div style="margin-top:20px; font-size:0.9rem; color:#999; cursor:pointer;" onclick="location.reload()">↺ Start Over</div>
     `;
 
-    // --- RENDER ENGINE ---
     const container = document.getElementById('game-container');
 
     function renderScene(id) {
@@ -330,20 +252,16 @@
                 <p>${scene.text}</p>
                 ${inputHTML}
                 <div class="btn-group">
-                    ${scene.options.map((opt, i) => `
-                        <button onclick="handleOption('${id}', ${i})">${opt.text}</button>
-                    `).join('')}
+                    ${scene.options.map((opt, i) => `<button onclick="handleOption('${id}', ${i})">${opt.text}</button>`).join('')}
                 </div>
             </div>
         `;
-        
         gsap.fromTo(".love-card", {y: 20, opacity: 0}, {y: 0, opacity: 1, duration: 0.6});
     }
 
     window.handleOption = (id, idx) => {
         const opt = story[id].options[idx];
         sessionData.path.push({ q: story[id].text, a: opt.text });
-
         if(opt.popup) openPopup(opt.popup, opt.next, opt.action);
         else proceed(opt.next, opt.action);
     };
@@ -351,19 +269,12 @@
     function proceed(nextId, action) {
         const input = document.getElementById('userInput');
         if(input) sessionData.finalInput = input.value;
-
-        if (action === "finale") {
-            saveData();
-            startFinale();
-        } else {
-            renderScene(nextId);
-        }
+        if (action === "finale") { saveData(); startFinale(); } 
+        else { renderScene(nextId); }
     }
 
-    // --- POPUP ---
     const popupOverlay = document.getElementById('popup-overlay');
     let pending = null;
-
     function openPopup(msg, next, action) {
         document.getElementById('popup-msg').innerText = msg;
         pending = { next, action };
@@ -371,7 +282,6 @@
         gsap.to(popupOverlay, { opacity: 1 });
         gsap.fromTo(".popup-content", { scale: 0.8 }, { scale: 1, duration: 0.4, ease: "back.out" });
     }
-
     window.closePopup = () => {
         gsap.to(popupOverlay, { opacity: 0, onComplete: () => {
             popupOverlay.style.pointerEvents = "none";
@@ -379,7 +289,6 @@
         }});
     };
 
-    // --- FINALE ---
     function startFinale() {
         gsap.to(container, { y: -50, opacity: 0, duration: 1 });
         gsap.to("#final-stage", { y: '0%', duration: 1, ease: "power2.inOut" });
@@ -389,43 +298,44 @@
         document.getElementById('hint').style.display = 'none';
         const tl = gsap.timeline();
         
-        tl.to("#seal", { scale: 1.2, opacity: 0, duration: 0.3 })
-          .set("#seal", { display: 'none' })
+        tl.to("#seal", { scale: 0, duration: 0.3 }) 
           .to("#flap", { rotateX: 180, duration: 0.6, transformOrigin: "top" })
           .set("#flap", { zIndex: 1 })
-          .set("#letterCard", { zIndex: 50 })
-          .to("#letterCard", { y: -120, duration: 1 })
-          .to("#letterCard", { 
-              scale: 1, 
-              width: "90vw", height: "70vh", 
-              top: "15%", left: "5%", 
-              y: 0, x: 0,
-              duration: 1, ease: "power2.inOut"
+          .set("#letterCard", { zIndex: 999 }) // FORCE TOP
+          
+          // 1. Slide Up
+          .to("#letterCard", { y: -150, duration: 0.8 })
+          
+          // 2. The FIX: Switch to FIXED and CENTER using xPercent/yPercent
+          .to("#letterCard", {
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              xPercent: -50, // This centers it horizontally
+              yPercent: -50, // This centers it vertically
+              x: 0, // Clear previous relative transforms
+              y: 0,
+              width: "90vw",
+              height: "80vh",
+              duration: 1.2,
+              ease: "back.out(0.5)" // Gentle pop
           })
           .call(() => {
               document.getElementById('letterText').innerHTML = fullMessage;
               gsap.to(".letter-content", { opacity: 1, duration: 1 });
-              confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, colors: ['#ff758c', '#ffd1ff'] });
+              confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#ff758c', '#ffd1ff'] });
           });
     };
 
-    // --- DB FUNCTIONS ---
     async function saveData() {
-        await supabaseClient.from('puja_answers').insert([{ 
-            question_path: sessionData.path, 
-            final_message: sessionData.finalInput 
-        }]);
+        await supabaseClient.from('puja_answers').insert([{ question_path: sessionData.path, final_message: sessionData.finalInput }]);
     }
-
     window.sendReply = async () => {
         const reply = document.getElementById('finalReply').value;
         if(!reply) return;
-        
         const btn = document.querySelector('.reply-btn');
         btn.innerText = "Sending...";
-        
         await supabaseClient.from('puja_answers').insert([{ final_message: "REPLY: " + reply }]);
-        
         btn.innerText = "Sent! ❤️";
         btn.style.backgroundColor = "#4cd137";
         confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
