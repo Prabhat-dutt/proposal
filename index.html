@@ -16,7 +16,6 @@
             --bg-soft: #fff0f3;
             --primary: #ff758c;
             --secondary: #ff7eb3;
-            --white: #ffffff;
             --text: #4a4a4a;
         }
 
@@ -25,14 +24,14 @@
         body {
             font-family: 'Fredoka', sans-serif;
             background-color: var(--bg-soft);
-            background-image: radial-gradient(#ffc1cc 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-image: radial-gradient(#ffc1cc 1.5px, transparent 1.5px);
+            background-size: 25px 25px;
             height: 100vh; width: 100vw;
             overflow: hidden;
             color: var(--text);
         }
 
-        /* --- UI ELEMENTS --- */
+        /* --- UI CARD --- */
         .screen {
             position: absolute; inset: 0;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -40,27 +39,28 @@
         }
 
         .love-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(255, 117, 140, 0.15);
-            padding: 2rem; width: 100%; max-width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(255, 117, 140, 0.2);
+            padding: 2rem; width: 100%; max-width: 450px;
             text-align: center; border: 2px solid white;
-            opacity: 0;
+            opacity: 0; transform: translateY(20px);
         }
 
-        h1 { font-size: 2rem; color: var(--primary); margin-bottom: 1rem; }
-        p { font-size: 1.1rem; color: #666; margin-bottom: 2rem; }
+        h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 1rem; line-height: 1.3; }
+        p { font-size: 1.1rem; color: #666; margin-bottom: 2rem; font-weight: 400; }
 
         button {
-            background: var(--white); border: 2px solid #ffe4e6;
-            padding: 14px; border-radius: 18px; width: 100%; margin-bottom: 12px;
+            background: white; border: 2px solid #ffe4e6;
+            padding: 15px; border-radius: 15px; width: 100%; margin-bottom: 10px;
             font-family: 'Fredoka', sans-serif; font-size: 1.1rem; color: var(--text);
-            cursor: pointer; transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        button:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        button:active { transform: scale(0.96); }
+        button:active { transform: scale(0.98); background: #fff0f3; }
+        
+        /* Highlight chosen path buttons if needed, or keep simple white */
 
         textarea {
             width: 100%; height: 100px; border: 2px solid #ffe4e6;
@@ -71,24 +71,27 @@
         /* --- POPUP --- */
         #popup-overlay {
             position: fixed; inset: 0; background: rgba(255,255,255,0.85); z-index: 999;
+            backdrop-filter: blur(5px);
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; backdrop-filter: blur(4px);
+            opacity: 0; pointer-events: none;
         }
         .popup-content {
             background: white; padding: 30px; border-radius: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 320px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center; width: 85%; max-width: 320px;
+            transform: scale(0.8);
         }
-        .popup-text { font-size: 1.4rem; color: var(--primary); margin-bottom: 20px; }
+        .popup-text { font-size: 1.5rem; color: var(--primary); margin-bottom: 20px; line-height: 1.4; }
         .next-btn {
             width: 50px; height: 50px; background: var(--primary); color: white;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem; margin: 0 auto; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 117, 140, 0.4);
         }
 
-        /* --- FINALE --- */
+        /* --- FINAL ENVELOPE STAGE --- */
         #final-stage { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #fff0f3 0%, #ffcbd1 100%);
+            background: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%);
             z-index: 100; transform: translateY(100%);
         }
 
@@ -112,34 +115,42 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 55px; height: 55px; background: #ffd700; border-radius: 50%;
             z-index: 40; display: flex; align-items: center; justify-content: center;
-            font-size: 1.6rem; border: 3px solid #f39c12; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 1.6rem; border: 3px solid #f39c12;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
+        /* The Card - Hidden inside initially */
         .card-letter {
             position: absolute; top: 10px; left: 15px;
             width: 270px; height: 180px;
             background: white; border-radius: 10px;
             z-index: 15; padding: 25px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
+            /* Important for the transition */
+            transform-origin: center center;
         }
 
         .letter-content {
-            font-family: 'Indie Flower'; font-size: 1.3rem; 
+            font-family: 'Indie Flower'; font-size: 1.25rem; 
             color: #444; line-height: 1.6; opacity: 0;
             height: 100%; overflow-y: auto; text-align: left;
         }
         
-        .reply-section { margin-top: 30px; border-top: 1px dashed #eee; padding-top: 20px; }
-        .reply-input { width: 100%; padding: 12px; border: 1px solid #ffe4e6; border-radius: 12px; margin-bottom: 10px; font-family: 'Fredoka'; }
-        .reply-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: 'Fredoka'; }
+        /* Scrollbar aesthetics */
+        .letter-content::-webkit-scrollbar { width: 6px; }
+        .letter-content::-webkit-scrollbar-thumb { background: #ffb1bc; border-radius: 10px; }
+
+        .reply-section { margin-top: 30px; border-top: 1px dashed #eee; padding-top: 20px; text-align: center; }
+        .reply-input { width: 100%; padding: 12px; border: 1px solid #ffe4e6; border-radius: 12px; margin-bottom: 10px; font-family: 'Fredoka'; font-size: 1rem; background: #fdfdfd;}
+        .reply-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: 'Fredoka'; font-size: 1rem; box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3);}
 
         .hint {
             position: absolute; bottom: -60px; width: 100%; text-align: center;
-            color: #ff758c; font-weight: 600; animation: bounce 1.5s infinite;
+            color: white; font-weight: 600; font-size: 1.2rem; 
+            animation: bounce 1.5s infinite;
         }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        .v-tag { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.75rem; color: #ffb1bc; }
     </style>
 </head>
 <body>
@@ -161,88 +172,92 @@
             <div class="card-letter" id="letterCard">
                 <div class="letter-content" id="letterText"></div>
             </div>
-            <div class="hint" id="hint">Tap the heart to open...</div>
+            <div class="hint" id="hint">Tap to open my heart...</div>
         </div>
-        <div class="v-tag">v2.1 | Made for Puja ❤️</div>
     </div>
 
 <script>
+    // --- SUPABASE SETUP ---
     const SUPABASE_URL = 'https://ezfihigzlgrxidhbulqb.supabase.co'; 
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6ZmloaWd6bGdyeGlkaGJ1bHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Mjk1NzMsImV4cCI6MjA4NjEwNTU3M30.sKd1cSawjDQ0JxDiddzhuC_Y-YlqDBK5uosviCImcQo';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let sessionData = { path: [], finalInput: "" };
 
+    // --- YOUR CUSTOM QUESTIONS & POPUPS ---
     const story = {
         start: {
-            title: "Hi Cutiepie! ✨",
-            text: "If our story was a movie, what genre would it be?",
+            title: "Hi cutiepie!",
+            text: "If our relationship was a movie genre, what would it be?",
             options: [
-                { text: "A Romantic Comedy 🎬", next: "rom_com" },
-                { text: "An Epic Adventure 🚀", next: "q2" }
+                { text: "Rom com ❤️", next: "rom_com_branch" },
+                { text: "Action Adventure 💥", next: "q2" }
             ]
         },
-        rom_com: {
-            title: "Ooo, Rom-Com?",
-            text: "Should I be more romantic than I am now?",
+        rom_com_branch: {
+            title: "A Rom-Com, huh?",
+            text: "Do you want me to be more romantic, or is it just fine now?",
             options: [
-                { text: "Yes, sweep me off my feet! 🌹", next: "how_romantic" },
-                { text: "You are perfect as you are 💖", next: "q2", popup: "Aw, you're the best! 🥰" }
+                { text: "Yes, more please! 😍", next: "how_romantic" },
+                { text: "It's fine now 😇", next: "q2", popup: "okay baby, I understand." }
             ]
         },
         how_romantic: {
-            title: "How much?",
-            text: "Choose your level...",
+            title: "How much romantic?",
+            text: "Pick your level...",
             options: [
-                { text: "Extremely (Possessive & Sweet)", next: "q2", popup: "Noted! Get ready 😉" },
-                { text: "Deep Soul Connection ✨", next: "q2", popup: "My soul is yours. ❤️" }
+                { text: "Extremely (Possessive & Romantic)", popup: "lovely", next: "q2" },
+                { text: "Beyond Extremely (Personal, Life, Love)", popup: "okay my beautiful cutiepie", next: "q2" }
             ]
         },
         q2: {
-            title: "Quick Question...",
-            text: "How often do you think of me?",
+            title: "Question 2",
+            text: "How many times a day do I cross your mind?",
             options: [
-                { text: "More than once a day 🙈", next: "q3", popup: "I feel lucky 🍀" },
-                { text: "All the time... 💭", next: "q3", popup: "Come closer then... 😉" }
+                { text: "More than once", popup: "I feel lucky 🫣", next: "q3" },
+                { text: "Everytime", popup: "toh mere pas aa jaya karo, ya hum aa jate hain na 🫣", next: "q3" }
             ]
         },
         q3: {
-            title: "Almost there...",
+            title: "One more thing...",
             text: "Do you know how much you mean to me?",
             options: [
-                { text: "Yes, I know 💕", next: "input_scene" },
-                { text: "Tell me again?", action: "finale" }
+                { text: "Yes", next: "input_branch" },
+                { text: "No, tell me", action: "finale" }
             ]
         },
-        input_scene: {
-            title: "Your Turn",
-            text: "What kind of person do you want me to be for you?",
+        input_branch: {
+            title: "Tell me more...",
+            text: "What do you feel about us? And what kind of person do you want me to be for you?",
             type: "input",
-            options: [{ text: "Send & See Surprise 💌", action: "finale" }]
+            options: [{ text: "Done, now tell me... 💌", action: "finale" }]
         }
     };
 
+    // --- YOUR ORIGINAL HINDI MESSAGE ---
     const fullMessage = `
-        My Dearest <span style="color:#ff758c; font-weight:bold;">Puja</span>,<br><br>
-        Jab pehli baar hum tumse mile the, tabhi hum jyada kuch jante nahi the tumhare baare mein. Lekin dhire-dhire jab hum dono baat karne lage... honestly, I was scared. Darr lagta tha ki kahin tum gussa na ho jao 😅.<br><br>
-        But then you called back. And that changed everything.<br><br>
-        Pata nahi kab tumhare liye feelings aa gayi. I always knew deep down that you would be mine. Aur ab jab tum meri ho... I promise to love you insanely. <br><br>
-        Darr aaj bhi lagta hai—ki kahin tum hurt na ho jao. Because you matter the most to me. Agar kabhi kuch galat bol du, toh daant dena, par roothna mat please?<br><br>
-        Happy Propose Day, my love.<br>
-        <span style="font-size:1.5rem; color:#ff758c; display:block; margin:10px 0;">I LOVE YOU SO MUCH 💕</span>
-        Forever yours,<br>Prabhat
-        <div class="reply-section">
-            <input type="text" id="finalReply" class="reply-input" placeholder="Type 'I love you too'...">
-            <button onclick="sendReply()" class="reply-btn">Send ❤️</button>
-        </div>
-        <div style="margin-top:20px; font-size:0.9rem; color:#999; cursor:pointer;" onclick="location.reload()">↺ Start Over</div>
+    Meri <span style="color:#ff758c; font-weight:bold;">cutiepie</span>,<br><br>
+    Jab pehli baar hum tumse mile the tabhi hum jyada kuch jante nahi the tumhare baare mein lekin dhire-dhire hum dono baat karne lage, pehle to dar lagne laga ki kahin tum sir se complaint na kar 😅 do isiliye message karne ke baad tumhara number block kar diye lekin fir jab tum call back ki to bohot accha laga.<br><br>
+    Aur fir dhire dhire kab man mein tumhare liye feelings aa gaya pata hi nahi chala, hum jante the ki kabhi na kabhi to tum meri ho jaogi, aur isliye kabhi haar nahi maane. Ab tum meri ho aur hum bhi paglon ki tarah tumse pyaar karte hain, par dar bhi lagta hai ki kahin tumko mere kisi bhi baat ka harkat ka bura na lage, aur tum hurt na ho jao, par jisse darte hai hum wahi ho jata hai, par hum tumse ye kehna chahte hain, ki hum bahot pyaar karte hain tumse, aur tum mere liye bahut jaruri ho.<br><br>
+    Meri kisi bhi baat ka bura mat mana karo na baccha. Hum kuch bolte hain to daant do na babu, par roya mat karo, accha nahi lagta na.<br><br>
+    Aaj propose day hai, par hum saamne se to jaake keh nahi sakte , isiliye aise bata rahe hain, meri puchki...<br><br>
+    <span style="font-size:1.5rem; color:#ff758c; font-weight:bold;">I LOVE YOU SO MUCH 💕 😘</span><br><br>
+    Meri life mein hone ke liye thank you babu 😘
+    
+    <div class="reply-section">
+        <input type="text" id="finalReply" class="reply-input" placeholder="Type 'I love you too babu'...">
+        <button onclick="sendReply()" class="reply-btn">Send ❤️</button>
+    </div>
+    
+    <div style="margin-top:20px; font-size:0.9rem; color:#999; cursor:pointer;" onclick="location.reload()">↺ Start Over</div>
     `;
 
+    // --- ENGINE ---
     const container = document.getElementById('game-container');
 
     function renderScene(id) {
         const scene = story[id];
-        let inputHTML = scene.type === 'input' ? `<textarea id="userInput" placeholder="Write your feelings..."></textarea>` : '';
+        let inputHTML = scene.type === 'input' ? `<textarea id="userInput" placeholder="Write here..."></textarea>` : '';
 
         container.innerHTML = `
             <div class="love-card">
@@ -254,7 +269,7 @@
                 </div>
             </div>
         `;
-        gsap.to(".love-card", { opacity: 1, y: 0, duration: 0.6 });
+        gsap.to(".love-card", { opacity: 1, y: 0, duration: 0.5, ease: "back.out" });
     }
 
     window.handleOption = (id, idx) => {
@@ -278,51 +293,59 @@
         pending = { next, action };
         popupOverlay.style.pointerEvents = "auto";
         gsap.to(popupOverlay, { opacity: 1, duration: 0.3 });
+        gsap.fromTo(".popup-content", { scale: 0.5 }, { scale: 1, duration: 0.4, ease: "back.out(1.7)" });
     }
     window.closePopup = () => {
-        gsap.to(popupOverlay, { opacity: 0, onComplete: () => {
+        gsap.to(".popup-content", { scale: 0.8, opacity: 0, duration: 0.3 });
+        gsap.to(popupOverlay, { opacity: 0, delay: 0.1, onComplete: () => {
             popupOverlay.style.pointerEvents = "none";
             proceed(pending.next, pending.action);
         }});
     };
 
     function startFinale() {
-        gsap.to(container, { opacity: 0, y: -50, duration: 0.8 });
-        gsap.to("#final-stage", { y: '0%', duration: 1.2, ease: "power3.inOut" });
+        gsap.to(container, { y: -50, opacity: 0, duration: 0.8 });
+        gsap.to("#final-stage", { y: '0%', duration: 1, ease: "power2.inOut" });
     }
 
     window.openEnvelope = () => {
         document.getElementById('hint').style.display = 'none';
         const tl = gsap.timeline();
         
-        tl.to("#seal", { scale: 0, duration: 0.4 })
-          .to("#flap", { rotateX: 180, duration: 0.6 })
+        tl.to("#seal", { scale: 0, duration: 0.3 })
+          .to("#flap", { rotateX: 180, duration: 0.6, transformOrigin: "top" })
           .set("#flap", { zIndex: 1 })
-          .set("#letterCard", { zIndex: 999 })
-          .to("#letterCard", { y: -160, duration: 0.8, ease: "power2.out" })
+          .set("#letterCard", { zIndex: 9999 }) // Ensure it's on top
+          
+          // 1. Move Up out of pocket
+          .to("#letterCard", { y: -200, duration: 0.8, ease: "back.out(1.2)" })
+          
+          // 2. Center to Screen (THE FIX)
           .to("#letterCard", {
               position: "fixed",
               top: "50%",
               left: "50%",
-              xPercent: -50,
-              yPercent: -50,
-              x: 0, y: 0,
+              xPercent: -50, // Centers the element horizontally
+              yPercent: -50, // Centers the element vertically
+              x: 0, 
+              y: 0, 
               width: "90vw",
-              height: "80vh",
-              duration: 1,
-              ease: "back.out(0.6)"
+              height: "75vh",
+              duration: 1.2,
+              ease: "power3.inOut"
           })
           .call(() => {
               const textDiv = document.getElementById('letterText');
               textDiv.innerHTML = fullMessage;
               gsap.to(textDiv, { opacity: 1, duration: 1 });
-              confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ff758c', '#ffffff'] });
+              confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#ff758c', '#ffffff'] });
           });
     };
 
     async function saveData() {
         await supabaseClient.from('puja_answers').insert([{ question_path: sessionData.path, final_message: sessionData.finalInput }]);
     }
+    
     window.sendReply = async () => {
         const reply = document.getElementById('finalReply').value;
         if(!reply) return;
