@@ -6,7 +6,6 @@
     <title>For My Cutiepie ❤️</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Indie+Flower&display=swap" rel="stylesheet">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -17,7 +16,7 @@
             --primary: #ff758c;
             --secondary: #ff7eb3;
             --text: #4a4a4a;
-            --glass: rgba(255, 255, 255, 0.92);
+            --glass: rgba(255, 255, 255, 0.95);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -31,12 +30,23 @@
             position: relative;
         }
 
-        /* --- BACKGROUND ANIMATIONS --- */
+        /* --- BACKGROUND (HEARTS + FIXED METEORS) --- */
         .bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
         .bg-heart { position: absolute; color: rgba(255, 117, 140, 0.4); font-size: 1.5rem; animation: floatUp 6s linear infinite; bottom: -50px; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(0.8); opacity: 0; } 20% { opacity: 0.6; } 100% { transform: translateY(-110vh) scale(1.2); opacity: 0; } }
-        .meteor { position: absolute; top: -50px; width: 2px; height: 60px; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,117,140,1)); opacity: 0; animation: meteorShower 4s linear infinite; }
-        @keyframes meteorShower { 0% { opacity: 0; transform: translateY(-50px) rotate(45deg); } 10% { opacity: 0.8; } 100% { opacity: 0; transform: translateY(100vh) translateX(-200px) rotate(45deg); } }
+        
+        .meteor { 
+            position: absolute; top: -10%; width: 2px; height: 80px; 
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,117,140,1)); 
+            opacity: 0; 
+            animation: meteorShower 3s linear infinite; 
+        }
+        /* FIXED: Now falls at the angle it is tilted */
+        @keyframes meteorShower { 
+            0% { opacity: 0; transform: translate(0, 0) rotate(35deg); } 
+            10% { opacity: 1; } 
+            100% { opacity: 0; transform: translate(-300px, 800px) rotate(35deg); } 
+        }
         .click-heart { position: absolute; pointer-events: none; z-index: 9999; font-size: 2rem; transform: translate(-50%, -50%); text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
 
         /* --- UI CARD --- */
@@ -45,15 +55,15 @@
 
         .love-card { background: var(--glass); backdrop-filter: blur(10px); border-radius: 30px; box-shadow: 0 10px 40px rgba(255, 117, 140, 0.2); padding: 2rem; width: 100%; max-width: 420px; text-align: center; border: 2px solid white; transition: transform 0.3s ease; }
         
-        .scene-img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 15px; }
+        .scene-img { width: 130px; height: 130px; object-fit: contain; margin-bottom: 15px; border-radius: 15px; }
 
         h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 0.5rem; }
         p { font-size: 1.1rem; color: #666; margin-bottom: 1.5rem; }
 
-        .option-btn { background: white; border: 2px solid #ffe4e6; padding: 14px; border-radius: 15px; width: 100%; margin-bottom: 10px; font-family: 'Fredoka'; font-size: 1.1rem; color: var(--text); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; }
+        .option-btn { background: white; border: 2px solid #ffe4e6; padding: 12px 15px; border-radius: 15px; width: 100%; margin-bottom: 10px; font-family: 'Fredoka'; font-size: 1rem; color: var(--text); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; }
         .option-btn.selected { border-color: var(--primary); background: #fff0f3; box-shadow: 0 0 15px rgba(255, 117, 140, 0.3); }
-        .check-icon { opacity: 0; color: var(--primary); }
-        .option-btn.selected .check-icon { opacity: 1; }
+        
+        .opt-icon { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; margin-left: 10px; border: 1px solid #eee; }
 
         .next-action-btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1rem; cursor: pointer; margin-top: 15px; opacity: 0; pointer-events: none; transition: 0.3s; font-family: 'Fredoka'; }
         .next-action-btn.visible { opacity: 1; pointer-events: auto; }
@@ -65,8 +75,8 @@
         /* --- POPUP --- */
         #popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
         .popup-content { background: white; padding: 30px; border-radius: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; width: 85%; max-width: 320px; transform: scale(0.8); transition: 0.3s; }
-        .popup-img { width: 80px; height: 80px; margin-bottom: 10px; }
-        .popup-text { font-size: 1.4rem; color: var(--primary); margin-bottom: 20px; }
+        .popup-img { width: 100px; height: 100px; margin-bottom: 10px; border-radius: 10px; }
+        .popup-text { font-size: 1.3rem; color: var(--primary); margin-bottom: 20px; line-height: 1.4; }
         .popup-close-btn { width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto; cursor: pointer; }
 
         /* --- FINALE --- */
@@ -75,14 +85,21 @@
         .pocket { position: absolute; bottom: 0; inset-inline: 0; height: 100%; background: #ff758c; border-radius: 0 0 10px 10px; z-index: 20; clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%); }
         .flap { position: absolute; top: 0; inset-inline: 0; height: 50%; background: #ff5c77; border-radius: 10px 10px 0 0; z-index: 30; transform-origin: top; clip-path: polygon(0 0, 100% 0, 50% 100%); }
         .seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 55px; height: 55px; background: #ffd700; border-radius: 50%; z-index: 40; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 3px solid #f39c12; }
-        .card-letter { position: absolute; top: 10px; left: 15px; width: 270px; height: 180px; background: white; border-radius: 10px; z-index: 15; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; transform-origin: center; }
+        
+        .card-letter { 
+            position: absolute; top: 10px; left: 15px; width: 270px; height: 180px; 
+            background: white; border-radius: 10px; z-index: 15; padding: 25px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; transform-origin: center; 
+        }
+        
         .letter-content { font-family: 'Indie Flower'; font-size: 1.2rem; color: #444; line-height: 1.6; opacity: 0; height: 100%; overflow-y: auto; text-align: left; }
         .reply-section { margin-top: 30px; border-top: 1px dashed #eee; padding-top: 20px; }
         .reply-input { width: 100%; padding: 12px; border: 1px solid #ffe4e6; border-radius: 12px; margin-bottom: 10px; font-family: 'Fredoka'; font-size: 1rem; }
-        .reply-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: 'Fredoka'; box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3); }
+        .reply-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: 'Fredoka'; }
+        
         .hint { position: absolute; bottom: -60px; width: 100%; text-align: center; color: white; font-weight: 600; font-size: 1.2rem; animation: bounce 1.5s infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .v-tag { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.75rem; color: #ffb1bc; opacity: 0.6; }
+        .v-tag { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.75rem; color: #ffb1bc; }
     </style>
 </head>
 <body>
@@ -91,7 +108,7 @@
     <div id="popup-overlay"><div class="popup-content"><img src="" id="popup-img" class="popup-img"><div class="popup-text" id="popup-msg"></div><div class="popup-close-btn" onclick="closePopup()">➜</div></div></div>
     <div class="nav-back-btn" id="navBackBtn" onclick="goBack()" style="display: none;">←</div>
     <div id="game-container" class="screen"></div>
-    <div id="final-stage"><div class="envelope-wrapper" id="envelopeWrapper"><div class="flap" id="flap"></div><div class="pocket"></div><div class="seal" id="seal" onclick="openEnvelope()">❤️</div><div class="card-letter" id="letterCard"><div class="letter-content" id="letterText"></div></div><div class="hint" id="hint">Tap to open my heart...</div></div><div class="v-tag">v3.3 | Peach & Goma Ed.</div></div>
+    <div id="final-stage"><div class="envelope-wrapper" id="envelopeWrapper"><div class="flap" id="flap"></div><div class="pocket"></div><div class="seal" id="seal" onclick="openEnvelope()">❤️</div><div class="card-letter" id="letterCard"><div class="letter-content" id="letterText"></div></div><div class="hint" id="hint">Tap to open my heart...</div></div><div class="v-tag">v3.4 | Made for Puja ❤️</div></div>
 
 <script>
     const SUPABASE_URL = 'https://ezfihigzlgrxidhbulqb.supabase.co'; 
@@ -102,51 +119,54 @@
     let currentSessionId = null;
     let currentSceneId = 'start';
 
-    // GIFs for each stage
+    // --- STORY DATA WITH YOUR LINKS ---
     const story = {
         start: { 
             title: "Hi cutiepie!", 
             text: "If our relationship was a movie genre, what would it be?", 
-            img: "https://media.tenor.com/S6M_p856t_0AAAAi/peach-goma.gif", // Waving
+            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGQEQgM-Su_gvjv5KZp8ofU0qvpGN8AuuCw&s",
             options: [{ text: "Rom com ❤️", next: "rom_com_branch" }, { text: "Action Adventure 💥", next: "q2" }] 
         },
         rom_com_branch: { 
             title: "A Rom-Com, huh?", 
             text: "Do you want me to be more romantic, or is it just fine now?", 
-            img: "https://media.tenor.com/p_rYm0K2Y08AAAAi/cute-cat.gif", // Flower cat
-            options: [{ text: "Yes, more please! 😍", next: "how_romantic" }, { text: "It's fine now 😇", next: "q2", popup: "okay baby, I understand.", pImg: "https://media.tenor.com/Uo-jV-E4I5MAAAAi/cat-cute.gif" }] 
+            img: "https://media.tenor.com/TTFelOytUMwAAAAj/love-you.gif",
+            options: [{ text: "Yes, more please! 😍", next: "how_romantic" }, { text: "It's fine now 😇", next: "q2", popup: "okay baby, I understand.", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4aF5aG0A58mpLrJgmK3txGXA60kqjoeij0A&s" }] 
         },
         how_romantic: { 
             title: "How much romantic?", 
             text: "Pick your level...", 
-            img: "https://media.tenor.com/YvV8iV8V4W0AAAAi/blush-cat.gif", // Blushing
-            options: [{ text: "Extremely (Possessive & Romantic)", popup: "lovely", pImg: "https://media.tenor.com/y80m49r8_7EAAAAi/mochi-mochi-peach-cat.gif", next: "q2" }, { text: "Beyond Extremely (Personal, Life, Love)", popup: "okay my beautiful cutiepie", pImg: "https://media.tenor.com/p04rX2l81b0AAAAi/peach-goma.gif", next: "q2" }] 
+            img: "https://ih1.redbubble.net/image.5564060209.6508/st,small,507x507-pad,600x600,f8f8f8.webp",
+            options: [
+                { text: "Extremely (Possessive & Romantic)", popup: "lovely", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmCkNgssnhJ6h8rXeLfoLIWJSBubrvqTWVHA&s", next: "q2", oImg: "https://static.vecteezy.com/system/resources/previews/066/175/034/non_2x/flat-illustration-showing-a-romantic-couple-giving-warm-hug-to-each-other-vector.jpg" }, 
+                { text: "Beyond Extremely (Personal, Life, Love)", popup: "okay my beautiful cutiepie", pImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgMxSFT0tGCc5BVK4BtVFTMgLHPVxLBJr68A&s", next: "q2", oImg: "https://st2.depositphotos.com/1006318/5909/v/450/depositphotos_59095503-stock-illustration-couple-kissing-in-bed.jpg" }
+            ] 
         },
         q2: { 
             title: "Question 2", 
             text: "How many times a day do I cross your mind?", 
-            img: "https://media.tenor.com/mOAsF62_Q6QAAAAi/peach-cat.gif", // Thinking
-            options: [{ text: "More than once", popup: "I feel lucky 🫣", pImg: "https://media.tenor.com/Psh0A01YtCgAAAAi/peach-goma.gif", next: "q3" }, { text: "Everytime", popup: "toh mere pas aa jaya karo, ya hum aa jate hain na 🫣", pImg: "https://media.tenor.com/G20S-M7i1tUAAAAi/peach-goma.gif", next: "q3" }] 
+            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD7a9M8WV0xOjTR79l9WlLxF99WxuT_-W-aA&s",
+            options: [{ text: "More than once", popup: "I feel lucky 🫣", pImg: "https://i.pinimg.com/originals/16/73/c1/1673c11056581664f508caefb8c737b8.gif", next: "q3" }, { text: "Everytime", popup: "toh mere pas aa jaya karo, ya hum aa jate hain na 🫣", pImg: "https://media.tenor.com/TTFelOytUMwAAAAj/love-you.gif", next: "q3" }] 
         },
         q3: { 
             title: "One more thing...", 
             text: "Do you know how much you mean to me?", 
-            img: "https://media.tenor.com/p1_r03vjU_0AAAAi/peach-goma.gif", // Hugging
+            img: "https://getbubududu.com/wp-content/uploads/2025/02/Peach-and-Goma-300x300.png",
             options: [{ text: "Yes", next: "input_branch" }, { text: "No, tell me", action: "finale" }] 
         },
         input_branch: { 
             title: "Tell me more...", 
             text: "What do you feel about us? And what kind of person do you want me to be for you?", 
-            img: "https://media.tenor.com/I2N32S5N6mUAAAAi/mochi-mochi-peach-cat-peach-and-goma.gif", // Writing
+            img: "https://getbubududu.com/wp-content/uploads/2025/02/Peach-and-Goma-300x300.png",
             type: "input", 
             options: [{ text: "Done, now tell me... 💌", action: "finale" }] 
         }
     };
 
-    const finalGif = "https://media.tenor.com/39A7hQ8_W-AAAAAi/love-peach-cat.gif"; // Big Heart
+    const finalCardImg = "https://scontent.fpat3-1.fna.fbcdn.net/v/t39.30808-6/475148285_527297853702563_111233335804019872_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=g_JDEjChjyIQ7kNvwG44RbJ&_nc_oc=AdngahRDO_eUgw3kbVZXJBUS4EELVt8kCL5g24jgsgma7iZi_u9dwrK0TVNnSExsFYs9Y77GcAb2RkGjggYAMmyH&_nc_zt=23&_nc_ht=scontent.fpat3-1.fna&_nc_gid=G3IzoNo3hli1854s0KUYTA&oh=00_Afs7gt5XxiCspyXetndE0sB0rJIrrK2CV9R1sSYXeiun2A&oe=698E2317";
 
     const fullMessage = `
-        <img src="${finalGif}" style="width:100px; display:block; margin:0 auto 10px;">
+        <img src="${finalCardImg}" style="width:100%; border-radius:10px; margin-bottom:15px;">
         Meri <span style="color:#ff758c; font-weight:bold;">cutiepie</span>,<br><br>
         Jab pehli baar hum tumse mile the tabhi hum jyada kuch jante nahi the tumhare baare mein lekin dhire-dhire hum dono baat karne lage, pehle to dar lagne laga ki kahin tum sir se complaint na kar 😅 do isiliye message karne ke baad tumhara number block kar diye lekin fir jab tum call back ki to bohot accha laga.<br><br>
         Aur fir dhire dhire kab man mein tumhare liye feelings aa gaya pata hi nahi chala, hum jante the ki kabhi na kabhi to tum meri ho jaogi, aur isliye kabhi haar nahi maane. Ab tum meri ho aur hum bhi paglon ki tarah tumse pyaar karte hain, par dar bhi lagta hai ki kahin tumko mere kisi bhi baat ka harkat ka bura na lage, aur tum hurt na ho jao, par jisse darte hai hum wahi ho jata hai, par hum tumse ye kehna chahte hain, ki hum bahot pyaar karte hain tumse, aur tum mere liye bahut jaruri ho.<br><br>
@@ -155,7 +175,7 @@
         <span style="font-size:1.5rem; color:#ff758c; font-weight:bold;">I LOVE YOU SO MUCH 💕 😘</span><br><br>
         Meri life mein hone ke liye thank you babu 😘 
         <div class="reply-section">
-            <input type="text" id="finalReply" class="reply-input" placeholder="kuch aur kehna chahti ho? yahan likho...">
+            <input type="text" id="finalReply" class="reply-input" placeholder="Type 'I love you too babu'...">
             <button onclick="sendReply()" class="reply-btn">Send ❤️</button>
         </div>
         <div style="margin-top:20px; font-size:0.9rem; color:#999; cursor:pointer;" onclick="location.reload()">↺ Start Over</div>`;
@@ -176,10 +196,11 @@
             h.style.left = Math.random() * 100 + '%'; h.style.animationDuration = (4 + Math.random() * 4) + 's';
             bg.appendChild(h); setTimeout(() => h.remove(), 8000);
         }, 800);
+        // METEOR SHOWER
         setInterval(() => {
-            const m = document.createElement('div'); m.className = 'meteor'; m.style.left = Math.random() * 100 + '%';
-            bg.appendChild(m); setTimeout(() => m.remove(), 4000);
-        }, 3000);
+            const m = document.createElement('div'); m.className = 'meteor'; m.style.left = (Math.random() * 100 + 20) + '%';
+            bg.appendChild(m); setTimeout(() => m.remove(), 3000);
+        }, 2000);
     }
     initBgEffects();
 
@@ -197,7 +218,11 @@
                 <p>${scene.text}</p>
                 ${inputHTML}
                 <div class="btn-group">
-                    ${(scene.options || []).map((opt, i) => `<div class="option-btn" id="opt-${i}" onclick="selectOption(${i})">${opt.text}<span class="check-icon">✔️</span></div>`).join('')}
+                    ${(scene.options || []).map((opt, i) => `
+                        <div class="option-btn" id="opt-${i}" onclick="selectOption(${i})">
+                            ${opt.text}
+                            ${opt.oImg ? `<img src="${opt.oImg}" class="opt-icon">` : '<span style="color:#ff758c; font-size:1.2rem;">✔️</span>'}
+                        </div>`).join('')}
                 </div>
                 <button id="nextBtn" class="next-action-btn" onclick="confirmSelection()">Next →</button>
             </div>`;
